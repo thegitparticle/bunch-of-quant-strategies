@@ -51,7 +51,7 @@ const server = http.createServer(async (req, res) => {
       let data = ''
       proxyRes.on('data', (chunk) => (data += chunk))
       proxyRes.on('end', () => {
-        res.writeHead(200, {
+        res.writeHead(proxyRes.statusCode, {
           'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
         })

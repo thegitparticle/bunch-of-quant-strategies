@@ -12,6 +12,7 @@ async function fetchCandles(coin, interval, days) {
   const res = await fetch(`/api/candles?coin=${coin}&interval=${interval}&days=${days}`)
   if (!res.ok) throw new Error(`Failed to fetch ${coin} ${interval}`)
   const raw = await res.json()
+  if (!Array.isArray(raw)) throw new Error(`Invalid response for ${coin} ${interval}`)
   return raw.map(c => ({
     time: c.t,
     open: parseFloat(c.o),
