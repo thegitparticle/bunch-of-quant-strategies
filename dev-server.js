@@ -5,7 +5,7 @@ const path = require('path')
 const url = require('url')
 
 const port = process.env.PORT ? Number(process.env.PORT) : 5173
-const rootDir = __dirname
+const rootDir = path.join(__dirname, 'public')
 
 const contentTypes = {
   '.html': 'text/html; charset=utf-8',

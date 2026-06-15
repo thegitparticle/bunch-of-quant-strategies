@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "node dev-server.js",
     "start": "node dev-server.js",
-    "deploy": "wrangler pages deploy .",
-    "preview": "wrangler pages dev ."
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
