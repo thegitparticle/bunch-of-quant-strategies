@@ -184,7 +184,7 @@ function Header() {
     <header className="header">
       <div className="container header-inner">
         <div className="brand">
-          <h1>QUANT.STRATEGIES</h1>
+          <h1>MATH STRATEGIES</h1>
           <span className="muted mono">Hyperliquid • 35 Strategies • 30-Day Backtest</span>
         </div>
         <div className="controls">

@@ -1,4 +1,4 @@
-# Quant Strategies — Hyperliquid Backtester
+# Math Strategies — Hyperliquid Backtester
 
 A no-build React dashboard that runs 35 pre-validated quant/technical strategies against live Hyperliquid perpetual data. Each strategy is backtested on the last 30+ days of candle data for BTC, ETH, SOL, and HYPE.
 
