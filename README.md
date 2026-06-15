@@ -1,13 +1,23 @@
-# dashboard-boilerplate
+# Quant Strategies — Hyperliquid Backtester
 
-This repo is a dashboard boilerplate demonstrating a Cloudflare Pages Functions backend paired with a lightweight React UI that runs without a build step.
+A no-build React dashboard that runs 35 pre-validated quant/technical strategies against live Hyperliquid perpetual data. Each strategy is backtested on the last 30+ days of candle data for BTC, ETH, SOL, and HYPE.
 
-## Demo: Runtime random API
+## Features
 
-A small Cloudflare Pages Function at `functions/random.ts` returns a runtime JSON payload with a random value. The dashboard demonstrates both:
+- **35 strategies**: Williams %R, MACD, Bollinger Mean-Reversion, SuperTrend
+- **4 assets**: BTC, ETH, SOL, HYPE on Hyperliquid perpetuals
+- **Real-time backtesting**: Fetches live candle data from Hyperliquid API
+- **Charts**: Equity curves, price charts with trade markers
+- **Trade log**: Every entry/exit with PnL, direction, and exit reason
+- **Dark/Light mode**: Industrial minimalism design
+- **Filter/sort**: By asset, indicator type
 
-- A **build-time** random value generated in the client at startup (static for the session).
-- A **runtime** random value fetched from the server (`/api/random`) on each page load or on demand.
+## Architecture
+
+- **Frontend**: No-build React 18 + HTM (browser-native ES modules)
+- **Backend**: Cloudflare Pages Functions proxy Hyperliquid candle API
+- **Engine**: Client-side backtest engine (indicators, filters, exits)
+- **Data**: Hyperliquid public API (no auth required)
 
 ## Local development
 
@@ -15,10 +25,30 @@ A small Cloudflare Pages Function at `functions/random.ts` returns a runtime JSO
 npm run dev
 ```
 
-This starts a tiny Node server (`dev-server.js`) that serves the static frontend and a local `/api/random` endpoint so you can test the runtime tile without Cloudflare Pages.
+Starts a Node.js dev server on port 5173 that serves static files and proxies `/api/candles` to the Hyperliquid API.
 
 ## Production deployment (Cloudflare Pages)
 
-Cloudflare Pages will serve the frontend files and the `functions/` directory. When deployed, `/api/random` is handled by the Pages Function in `functions/random.ts`.
+Deploy as a Cloudflare Pages project. The `functions/` directory handles the API proxy. Static files are served directly.
 
-Styling: added orange/green brand tints, dark-mode support and a compact/dense UI toggle for an industrial, information-dense look.
+## Strategy Indicators
+
+| Indicator | Count | Description |
+|-----------|-------|-------------|
+| Williams %R | 17 | Reversal signals from oversold/overbought territory |
+| MACD | 12 | Crossover signals (MACD line vs signal line) |
+| Bollinger | 5 | Mean-reversion at band touches |
+| SuperTrend | 1 | Trend-flip signals |
+
+## Filters
+
+- `ema_trend`: Only trade in direction of EMA trend
+- `rsi_band`: Only trade when RSI is within specified band
+- `atr_regime`: Only trade when ATR ratio is within threshold
+
+## Exit Rules
+
+- Take-profit: N× ATR from entry
+- Stop-loss: N× ATR from entry
+- Time stop: Exit after max_bars if neither TP/SL hit
+- Cooldown: Wait N bars after position close

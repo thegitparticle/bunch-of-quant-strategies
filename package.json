@@ -1,5 +1,5 @@
 {
-  "name": "dashboard-boilerplate",
+  "name": "bunch-of-quant-strategies",
   "private": true,
   "scripts": {
     "dev": "node dev-server.js",
