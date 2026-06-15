@@ -112,7 +112,7 @@ function App() {
     const r = results[selectedStrategy.id]
     return html`
       <div className="page">
-        <div className="scanline" aria-hidden="true"></div>
+
         <${Header} />
         <main className="container">
           <button className="button button-orange" style=${{ marginBottom: '16px' }} onClick=${() => setSelectedStrategy(null)}>
