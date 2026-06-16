@@ -6,6 +6,17 @@ import { runBacktest } from './engine.js'
 
 const html = htm.bind(React.createElement)
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+function getTradesPerDay(result) {
+  if (!result || !result.stats || !result.candles || result.candles.length < 2) return 0
+  const firstTime = result.candles[0].time
+  const lastTime = result.candles[result.candles.length - 1].time
+  const days = (lastTime - firstTime) / MS_PER_DAY
+  if (days <= 0) return 0
+  return result.stats.tradeCount / days
+}
+
 // --- Data Fetching ---
 
 async function fetchCandles(coin, interval, days) {
@@ -32,6 +43,7 @@ function App() {
   const [selectedStrategy, setSelectedStrategy] = useState(null)
   const [filterAsset, setFilterAsset] = useState('ALL')
   const [filterIndicator, setFilterIndicator] = useState('ALL')
+  const [sortBy, setSortBy] = useState('none')
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -91,12 +103,24 @@ function App() {
   }
 
   const filteredStrategies = useMemo(() => {
-    return STRATEGIES.filter(s => {
+    const filtered = STRATEGIES.filter(s => {
       if (filterAsset !== 'ALL' && s.asset !== filterAsset) return false
       if (filterIndicator !== 'ALL' && s.spec.indicator !== filterIndicator) return false
       return true
     })
-  }, [filterAsset, filterIndicator])
+    if (sortBy === 'none') return filtered
+    return [...filtered].sort((a, b) => {
+      const ra = results[a.id]
+      const rb = results[b.id]
+      if (!ra || !ra.stats) return 1
+      if (!rb || !rb.stats) return -1
+      if (sortBy === 'pnl_desc') return rb.stats.totalPnl - ra.stats.totalPnl
+      if (sortBy === 'pnl_asc') return ra.stats.totalPnl - rb.stats.totalPnl
+      if (sortBy === 'tpd_desc') return getTradesPerDay(rb) - getTradesPerDay(ra)
+      if (sortBy === 'tpd_asc') return getTradesPerDay(ra) - getTradesPerDay(rb)
+      return 0
+    })
+  }, [filterAsset, filterIndicator, sortBy, results])
 
   const aggregateStats = useMemo(() => {
     const completed = Object.values(results).filter(r => r.stats)
@@ -165,6 +189,16 @@ function App() {
             ${['ALL', 'williams_r', 'macd', 'bollinger', 'supertrend'].map(ind => html`
               <button key=${ind} className=${`button ${filterIndicator === ind ? 'button-active' : ''}`} onClick=${() => setFilterIndicator(ind)}>${ind === 'ALL' ? 'ALL' : ind.toUpperCase()}</button>
             `)}
+          </div>
+          <div className="filter-group">
+            <span className="mono muted filter-label">SORT:</span>
+            <button className=${`button ${sortBy === 'none' ? 'button-active' : ''}`} onClick=${() => setSortBy('none')}>DEFAULT</button>
+            <button className=${`button ${sortBy.startsWith('pnl') ? 'button-active' : ''}`} onClick=${() => setSortBy(sortBy === 'pnl_desc' ? 'pnl_asc' : 'pnl_desc')}>
+              PNL ${sortBy === 'pnl_desc' ? '↓' : sortBy === 'pnl_asc' ? '↑' : ''}
+            </button>
+            <button className=${`button ${sortBy.startsWith('tpd') ? 'button-active' : ''}`} onClick=${() => setSortBy(sortBy === 'tpd_desc' ? 'tpd_asc' : 'tpd_desc')}>
+              TRADES/DAY ${sortBy === 'tpd_desc' ? '↓' : sortBy === 'tpd_asc' ? '↑' : ''}
+            </button>
           </div>
         </section>
         <section className="strategy-grid">
@@ -248,6 +282,10 @@ function StrategyCard({ strategy, result, onClick }) {
           <div className="stat-row">
             <span className="mono muted">Trades</span>
             <span className="mono">${r.stats.tradeCount}</span>
+          </div>
+          <div className="stat-row">
+            <span className="mono muted">Trades/D</span>
+            <span className="mono">${getTradesPerDay(r).toFixed(1)}</span>
           </div>
           <div className="stat-row">
             <span className="mono muted">MaxDD</span>
