@@ -6,15 +6,9 @@ import { runBacktest } from './engine.js'
 
 const html = htm.bind(React.createElement)
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000
-
 function getTradesPerDay(result) {
-  if (!result || !result.stats || !result.candles || result.candles.length < 2) return 0
-  const firstTime = result.candles[0].time
-  const lastTime = result.candles[result.candles.length - 1].time
-  const days = (lastTime - firstTime) / MS_PER_DAY
-  if (days <= 0) return 0
-  return result.stats.tradeCount / days
+  if (!result || !result.recentTrades) return 0
+  return result.recentTrades.length / 30
 }
 
 // --- Data Fetching ---
@@ -112,7 +106,7 @@ function App() {
     return [...filtered].sort((a, b) => {
       const ra = results[a.id]
       const rb = results[b.id]
-      if (!ra || !ra.stats) return 1
+      if (!ra || !ra.stats) return (!rb || !rb.stats) ? 0 : 1
       if (!rb || !rb.stats) return -1
       if (sortBy === 'pnl_desc') return rb.stats.totalPnl - ra.stats.totalPnl
       if (sortBy === 'pnl_asc') return ra.stats.totalPnl - rb.stats.totalPnl
